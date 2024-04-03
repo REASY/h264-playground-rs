@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description"
+          content="jMuxer - a simple javascript mp4 muxer for non-standard streaming communications protocol">
+    <meta name="keywords" content="h264 player, mp4 player, mse, mp4 muxing, jmuxer, aac player">
+    <title>JMuxer demo</title>
+</head>
+<body>
+<div id="container" style="margin: 0 auto; text-align: center;">
+    <video style="border: 1px solid #333; max-width: 1260px;" controls autoplay height="810" width="1260"
+           id="player"></video>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jmuxer@2.0.5/dist/jmuxer.js"></script>
+<script>
+    async function get_segment(url) {
+        const r = await fetch(url);
+        if (r.ok) {
+            const data = await new Response(r.body).arrayBuffer();
+            return new Uint8Array(data);
+        } else {
+            throw new Error(r.statusText)
+        }
+    }
+
+    let jmuxer;
+    window.onload = async function () {
+        jmuxer = new JMuxer({
+            node: 'player',
+            mode: 'video',
+            flushingTime: 1000,
+            fps: 20,
+            debug: true,
+            onError: function (data) {
+                if (/Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor)) {
+                    jmuxer.reset();
+                }
+            }
+        });
+
+        const s1 = await get_segment('http://127.0.0.1:18080/v1/segment/test?offset=0&length=10000&video_type=Raw');
+        jmuxer.feed({
+            video: s1
+        });
+        const s2 = await get_segment('http://127.0.0.1:18080/v1/segment/test?offset=10000&length=10000&video_type=Raw');
+        jmuxer.feed({
+            video: s2
+        });
+    }
+</script>
+</body>
+</html>

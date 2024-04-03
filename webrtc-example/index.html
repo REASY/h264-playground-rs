@@ -1,0 +1,79 @@
+<html>
+<head>
+    <style>
+        #video {
+            object-fit: initial;
+            width: 1920px;
+            height: 1080px;
+        }
+    </style>
+    <title>WebRTC example</title>
+</head>
+<body>
+<script>
+    const config = {
+        iceServers: [
+            {
+                urls: ['stun:stun.cloudflare.com:3478', "stun:stun.l.google.com:19302"]
+            }
+        ],
+        iceTransportPolicy: "all",
+    };
+    let peer_conn = new RTCPeerConnection(config);
+    let log = msg => {
+        const msg_with_ts = new Date().toLocaleString() + " " + msg;
+        console.log(msg_with_ts);
+        document.getElementById('div').innerHTML += msg_with_ts + '<br>'
+    }
+
+    peer_conn.ontrack = function (event) {
+        const video = document.querySelector('video');
+        video.srcObject = event.streams[0];
+    }
+
+    peer_conn.oniceconnectionstatechange = e => log(peer_conn.iceConnectionState)
+    peer_conn.onicecandidate = event => {
+        const lsdEl = document.getElementById('localSessionDescription');
+        if (lsdEl.value === null || lsdEl.value === "" ) {
+            lsdEl.value  = JSON.stringify(peer_conn.localDescription)
+        }
+    }
+
+    // Offer to receive 1 video track
+    peer_conn.addTransceiver('video', {'direction': 'sendrecv'})
+
+    peer_conn.createOffer().then(d => peer_conn.setLocalDescription(d)).catch(log)
+
+    window.startSession = () => {
+        let sd = document.getElementById('remoteSessionDescription').value
+        if (sd === '') {
+            return alert('Session Description must not be empty')
+        }
+
+        try {
+            peer_conn.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(sd))))
+        } catch (e) {
+            alert(e)
+        }
+    }
+</script>
+Browser base64 Session Description<br/>
+<label for="localSessionDescription"></label><textarea id="localSessionDescription" readonly="readonly"></textarea>
+<br/>
+
+WebRTC base64 Session Description<br/>
+<label for="remoteSessionDescription"></label><textarea id="remoteSessionDescription"> </textarea> <br/>
+<button onclick="window.startSession()"> Start Session</button>
+<br/>
+<br/>
+
+Logs<br/>
+<div id="div"></div>
+
+Video<br/>
+<div id="remoteVideos"></div>
+<video playsinline autoplay muted id="video"></video>
+
+<br/>
+</body>
+</html>

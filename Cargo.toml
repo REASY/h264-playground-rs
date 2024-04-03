@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "dynamic-hls-api",
+    "webrtc-example",
+]
+
+[workspace.dependencies]
+clap = { version = "4", features = ["derive"] }
+const_format = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+shadow-rs = "0.27.1"
+thiserror = "1.0"
+tokio = { version = "1", features = ["full"] }
+tokio-util = {version="0.7", features = ["codec"] }
+tracing = "0.1"
+tracing-subscriber= { version = "0.3", features = ["env-filter"] }

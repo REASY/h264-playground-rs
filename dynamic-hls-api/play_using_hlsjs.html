@@ -1,0 +1,48 @@
+<html>
+<head>
+    <title>Hls.js to play video from CAM_M_F camera</title>
+</head>
+<body>
+<center>
+    <h1>Hls.js to play video from CAM_M_F camera</h1>
+    <video height="810" width="1260" id="video" controls></video>
+</center>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.js"></script>
+<script>
+    const playlistUrl = "http://127.0.0.1:18080/v1/playlist/test";
+    const video = document.getElementById('video');
+    if (Hls.isSupported()) {
+        const hls = new Hls({
+            debug: true,
+            maxBufferSize: 250 * 1024 * 1024,
+            maxBufferLength: 20,
+            lowLatencyMode: true,
+        });
+        hls.loadSource(playlistUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+            video.muted = true;
+            video.play();
+        });
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+            console.log(
+                'manifest loaded, found ' + data.levels.length + ' quality level'
+            );
+        });
+        hls.on(Hls.Events.FRAG_PARSING_USERDATA, function (event, data) {
+            console.log('event =====> ', event, 'data =====> ', data)
+        });
+
+    }
+        // hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
+        // When the browser has built-in HLS support (check using `canPlayType`), we can provide an HLS manifest (i.e. .m3u8 URL) directly to the video element through the `src` property.
+    // This is using the built-in support of the plain video element, without using hls.js.
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = playlistUrl;
+        video.addEventListener('canplay', function () {
+            video.play();
+        });
+    }
+</script>
+</body>
+</html>

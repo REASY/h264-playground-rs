@@ -1,0 +1,22 @@
+[package]
+name = "webrtc-example"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+base64 = "0.22"
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+shadow-rs.workspace = true
+thiserror.workspace = true
+tokio-util.workspace = true
+tokio.workspace = true
+tracing-subscriber.workspace = true
+tracing.workspace = true
+webrtc = "0.10.1"
+
+[build-dependencies]
+shadow-rs.workspace = true
